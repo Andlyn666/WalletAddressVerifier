@@ -1,5 +1,5 @@
 package message
 
-func GetRandomMessage() string {
-	return "Random Message"
+func GetRandomMessage() []byte {
+	return []byte("Random Message")
 }
