@@ -1,7 +1,6 @@
 package message
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 )
@@ -9,8 +8,8 @@ import (
 func TestRandomMessageGenerate(t *testing.T) {
 	fmt.Printf("TestRandomMessageGenerate Start \n")
 	msg := GetRandomMessage()
-	if !bytes.Equal([]byte("Random Message"), msg) {
-		t.Errorf("GetRandomMessage() expect :%v got:%v", "Random Message", msg)
+	if msg == nil {
+		t.Errorf("GetRandomMessage() return nil")
 	}
-	fmt.Printf("TestRandomMessageGenerate Finished \n")
+	fmt.Printf("TestRandomMessageGenerate Finished\nMessage : %v \n", msg)
 }

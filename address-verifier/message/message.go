@@ -1,5 +1,14 @@
 package message
 
+import (
+	"crypto/rand"
+)
+
 func GetRandomMessage() []byte {
-	return []byte("Random Message")
+	randomBytes := make([]byte, 20)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return nil
+	}
+	return randomBytes
 }
