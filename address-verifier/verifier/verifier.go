@@ -7,21 +7,21 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
-func VerifyAddressPrivateKey(addr []byte, sig []byte) bool {
+func VerifyAddressPrivateKey(addr []byte, sig []byte, msg []byte) bool {
 	// Define msg and get its hash value
-	msg := []byte("Random Message")
 	msgHash := crypto.Keccak256Hash(msg)
 
 	// Get public key from signatrue
 	pubKeyECDSA, err := crypto.SigToPub(msgHash.Bytes(), sig)
 	if err != nil {
 		log.Fatal(err)
+		return false
 	}
 
 	// Get the address from public key
 	addressFromSig := crypto.PubkeyToAddress(*pubKeyECDSA).Bytes()
 
-	// Match the generate adress and input adress
+	// Match the generate address and input address
 	matches := bytes.Equal(addr, addressFromSig)
 	return matches
 }

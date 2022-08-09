@@ -2,6 +2,7 @@ package verifier
 
 import (
 	"crypto/ecdsa"
+	"encoding/hex"
 	"fmt"
 	"testing"
 
@@ -23,19 +24,21 @@ func TestVerifyAddressPrivateKeyTrue(t *testing.T) {
 		t.Errorf("Public Key is not of type *ecdsa.PublicKey")
 	}
 
-	// get the address from public key
+	// Get the address from public key
 	address := crypto.PubkeyToAddress(*pubKeyECDSA).Bytes()
+	fmt.Printf("Address: %x \n", address)
 
 	// Define msg and get its hash value
-	msg := []byte("Random Message")
+	msg, _ := hex.DecodeString("8ba487015fcdf887e91e09ae47d6c09541ff92d7")
 	msgHash := crypto.Keccak256Hash(msg)
 
-	// sign the message by using the private key
+	// Sign the message by using the private key
 	signature, err := crypto.Sign(msgHash.Bytes(), privateKey)
+	fmt.Printf("Signature: %x \n", signature)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	result := VerifyAddressPrivateKey(address, signature)
+	result := VerifyAddressPrivateKey(address, signature, msg)
 	if !result {
 		t.Errorf("Expect true but got %v", result)
 	}
@@ -56,11 +59,13 @@ func TestVerifyAddressPrivateKeyFalse(t *testing.T) {
 		t.Errorf("Public Key is not of type *ecdsa.PublicKey")
 	}
 
-	// get the address from public key
+	// Get the address from public key
 	address := crypto.PubkeyToAddress(*pubKeyECDSA).Bytes()
+	fmt.Printf("Address: %x \n", address)
 
+	// Generate private key
 	// Define msg and get its hash value
-	msg := []byte("Random Message")
+	msg, _ := hex.DecodeString("8ba487015fcdf887e91e09ae47d6c09541ff92d7")
 	msgHash := crypto.Keccak256Hash(msg)
 
 	// Generate another private key
@@ -68,12 +73,13 @@ func TestVerifyAddressPrivateKeyFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Private key generate new private key failed")
 	}
-	// sign the message by using the private key
+	// Sign the message by using the new private key
 	signature, err := crypto.Sign(msgHash.Bytes(), privateKeyNew)
+	fmt.Printf("Signature: %x \n", signature)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	result := VerifyAddressPrivateKey(address, signature)
+	result := VerifyAddressPrivateKey(address, signature, msg)
 	if result {
 		t.Errorf("Expect false but got %v", result)
 	}

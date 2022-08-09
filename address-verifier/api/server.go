@@ -9,27 +9,52 @@ import (
 	"github.com/labstack/echo"
 )
 
+type Message struct {
+	Message string `json:"message"`
+}
+
+type VerifyResult struct {
+	Verified bool `json:"verified"`
+}
+
 func main() {
+	// Define the map to store the random message of each address
+	var adressMsgMap map[string][]byte
+	adressMsgMap = make(map[string][]byte)
+
 	e := echo.New()
-	e.GET("/get_message", func(c echo.Context) error {
-		return c.String(http.StatusOK, "message : "+string(message.GetRandomMessage()))
+	// /get_message API
+	e.POST("/get_message", func(c echo.Context) error {
+		address := c.FormValue("address")
+		var msg = message.GetRandomMessage()
+		if msg == nil {
+			return c.JSON(http.StatusOK, "null")
+		}
+		res := &Message{
+			Message: hex.EncodeToString(msg),
+		}
+		adressMsgMap[address] = msg
+
+		return c.JSON(http.StatusOK, res)
 	})
 
+	// /verify API
 	e.POST("/verify", func(c echo.Context) error {
 		address := c.FormValue("address")
 		signedMessage := c.FormValue("signedMessage")
 		addressBytes, _ := hex.DecodeString(address)
 		signedMessageBytes, _ := hex.DecodeString(signedMessage)
-
-		result := verifier.VerifyAddressPrivateKey(addressBytes, signedMessageBytes)
-		var resultStr string
-		if result {
-			resultStr = "true"
+		message := adressMsgMap[address]
+		var result bool
+		if message == nil {
+			result = false
 		} else {
-			resultStr = "false"
+			result = verifier.VerifyAddressPrivateKey(addressBytes, signedMessageBytes, message)
 		}
-
-		return c.String(http.StatusOK, "verified : "+resultStr)
+		res := &VerifyResult{
+			Verified: result,
+		}
+		return c.JSON(http.StatusOK, res)
 	})
 	e.Logger.Fatal(e.Start(":1323"))
 }
